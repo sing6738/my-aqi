@@ -1,0 +1,34 @@
+name: Update AQI Data
+
+on:
+  schedule:
+    - cron: '0 * * * *' # รันทุกชั่วโมง
+  workflow_dispatch: # กดรันเองได้
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Update AQI Data
+        env:
+          AQI_TOKEN: ${{ secrets.AQI_TOKEN }}
+        run: python update_aqi.py
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data.json
+          git commit -m "Update AQI data" || exit 0
+          git push

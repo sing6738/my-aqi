@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องตรวจวัดคุณภาพอากาศ (AQI)</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --text-main: #1c1e21;
+        }
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: var(--text-main);
+        }
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        .aqi-value {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        .status {
+            font-size: 1.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: white;
+        }
+        .location { font-size: 1.2rem; color: #555; }
+        .update-time { font-size: 0.8rem; color: #888; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="location" id="city">กำลังโหลด...</div>
+        <div class="aqi-value" id="aqi">-</div>
+        <div id="status-box" class="status">รอข้อมูล</div>
+        <div id="desc">คุณภาพอากาศในพื้นที่ของคุณ</div>
+        <div class="update-time" id="time">อัปเดตล่าสุด: -</div>
+    </div>
+
+    <script>
+        async function fetchAQI() {
+            try {
+                const response = await fetch('data.json?t=' + new Date().getTime());
+                const data = await response.json();
+                
+                document.getElementById('city').innerText = data.city;
+                document.getElementById('aqi').innerText = data.aqi;
+                document.getElementById('time').innerText = 'อัปเดตล่าสุด: ' + data.time;
+                
+                const statusBox = document.getElementById('status-box');
+                let color = "#00e400";
+                let text = "ดีมาก";
+                
+                if(data.aqi > 50) { color = "#ffff00"; text = "ปานกลาง"; statusBox.style.color = "black"; }
+                if(data.aqi > 100) { color = "#ff7e00"; text = "เริ่มมีผลต่อสุขภาพ"; statusBox.style.color = "white"; }
+                if(data.aqi > 150) { color = "#ff0000"; text = "ไม่ดีต่อสุขภาพ"; }
+                if(data.aqi > 200) { color = "#8f3f97"; text = "แย่มาก"; }
+                if(data.aqi > 300) { color = "#7e0023"; text = "อันตราย"; }
+                
+                statusBox.style.backgroundColor = color;
+                statusBox.innerText = text;
+            } catch (e) {
+                console.error("Error loading data", e);
+            }
+        }
+        fetchAQI();
+    </script>
+</body>
+</html>
